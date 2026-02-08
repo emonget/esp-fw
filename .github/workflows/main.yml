@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       LIB_NAME: esp32-toolkit-lib
-      PIO_ENV_CONF: esp32-latest
+      PIO_ENV_CONF: esp32s3
       FIRMWARE_SRC: firmware-main.cpp
     steps:
       - name: Retrieve workspace artifact
