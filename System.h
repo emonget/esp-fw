@@ -30,4 +30,5 @@ public:
                              std::string sDns2);
   static void activateWifiAP(std::string ssid, std::string pwd);
   static void activateWifiSTA(std::string ssid, std::string pwd);
+  static void deepSleep(int sleepdelay);
 };

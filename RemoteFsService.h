@@ -52,7 +52,7 @@ private:
 
 public:
   // This method is called when a message arrives
-  void onMessage(WebsocketInputStreambuf *input);
+  void onPacket(WebsocketInputStreambuf *input);
   // Handler function on connection close
   void onClose();
   // extract json structure
@@ -109,13 +109,13 @@ void FsRemoteService::init() {
 
 // Finally, passing messages around. If we receive something, we send it to all
 // other clients
-void FsRemoteService::onMessage(WebsocketInputStreambuf *inbuf) {
+void FsRemoteService::onPacket(WebsocketInputStreambuf *inbuf) {
   // Get the input message
   std::ostringstream ss;
   std::string msg;
   ss << inbuf;
   msg = ss.str();
-  // this->send("[LogRemoteService::onMessage]", SEND_TYPE_TEXT);
+  // this->send("[LogRemoteService::onPacket]", SEND_TYPE_TEXT);
   // readFile(CONFIG_FILE);
   extractMsg(msg);
 }

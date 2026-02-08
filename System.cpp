@@ -147,3 +147,10 @@ void System::activateWifiAP(std::string ssid, std::string pwd) {
   LogStore::info("[System::activateWifiAP] Hotspot " + ssid + " available at " +
                  ipAddress);
 }
+
+void System::deepSleep(int sleepdelay) {
+  LogStore::info("[System::deepSleep] Going deep sleep in " +
+                 std::to_string(sleepdelay));
+
+  esp_deep_sleep_start();
+}

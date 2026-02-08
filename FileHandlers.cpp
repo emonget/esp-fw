@@ -51,14 +51,14 @@ void JsonFileHandler::load() {
                  std::string(fileName));
   std::string fileContent = readContent();
   // convert to a json object
-  DeserializationError error = deserializeJson(jsFileContent, fileContent);
+  DeserializationError err = deserializeJson(jsFileContent, fileContent);
 
   // Test if parsing succeeds.
-  if (!error) {
-    LogStore::info("[JsonFileHandler::load] Done parsing configuration");
+  if (!err) {
+    LogStore::info("[JsonFileHandler::load] Done parsing file");
   } else {
     LogStore::info("[JsonFileHandler::load] json parsing failed: ");
-    Serial.println(error.f_str());
+    Serial.println(err.f_str());
   }
 }
 
@@ -67,14 +67,14 @@ void JsonFileHandler::load() {
  */
 void JsonFileHandler::merge(std::string newContent) {
   JsonDocument jsNewContent;
-  DeserializationError error = deserializeJson(jsNewContent, newContent);
+  DeserializationError err = deserializeJson(jsNewContent, newContent);
 
   // Test if parsing succeeds.
-  if (!error) {
+  if (!err) {
     LogStore::info("[mergeInJsonFile] Success parsing json");
   } else {
     LogStore::info("[mergeInJsonFile] Error: json parsing failed");
-    Serial.println(error.f_str());
+    Serial.println(err.f_str());
   }
 
   // merge objects
@@ -88,6 +88,8 @@ void JsonFileHandler::flush() {
   // reserialize and write back to original file
   std::string sFileContentCopy = "";
   serializeJsonPretty(jsFileContent, sFileContentCopy);
+  LogStore::info("[JsonFileHandler::flush] dump " + fileName +
+                 " content:" + sFileContentCopy);
   // TODO
   // return sFileContentCopy;
 }
