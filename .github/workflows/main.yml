@@ -3,7 +3,6 @@ name: PlatformIO CI
 on: [push]
 
 jobs:
-  # generate workspace artifact that will be used by next job to build firmware
   workspace_setup:
     name: Generate workspace
     runs-on: ubuntu-latest
@@ -11,22 +10,21 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
     env:
       LIB_NAME: esp32-toolkit-lib
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Cache PlatformIO
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.platformio
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
       - name: Install PlatformIO
         run: |
           python -m pip install --upgrade pip
@@ -34,35 +32,27 @@ jobs:
       - name: Setup PlatformIO project
         run: |
           pio init --board esp32doit-devkit-v1
-        # cd lib/ && git clone git@github.com/GITHUB_REPOSITORY
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          # fetch-depth: 0
           path: lib/${{ env.LIB_NAME }}
       - name: Configure workspace
         env:
           MKLITTLEFS_BIN_URL: "https://github.com/earlephilhower/mklittlefs/releases/download/3.0.0/x86_64-linux-gnu-mklittlefs-295fe9b.tar.gz"
           DIGIPOT_LIB_URL: "https://electropeak.com/learn/wp-content/uploads/2021/02/DigiPotX9Cxxx.zip"
         run: |
-          rm platformio.ini # remove default pio config to allow symlink to custom config later 
-          # @todo check if sym link can be included in workspace artifact
-          # rm platformio.ini && ln -s lib/$LIB_NAME/.config/platformio.ini platformio.ini
-          # ln -s lib/$LIB_NAME/.config/.gitmodules .gitmodules
-          # ln -s lib/$LIB_NAME/.config/scripts/replace_fs.py replace_fs.py
-          # ln -s ../lib/$LIB_NAME/.config/main.cpp src/main.cpp
+          rm platformio.ini
           cd lib/$LIB_NAME && git remote set-url origin git@github.com:$GITHUB_REPOSITORY.git
           cd /home/runner/work/ 
           wget -O mklittlefs.tar.gz $MKLITTLEFS_BIN_URL && tar -xf mklittlefs.tar.gz && mv mklittlefs/mklittlefs $GITHUB_WORKSPACE
           wget $DIGIPOT_LIB_URL && unzip DigiPotX9Cxxx.zip && mv DigiPotX9Cxxx/ $GITHUB_WORKSPACE/lib/
           ls -laR $GITHUB_WORKSPACE
       - name: Workspace artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: pio-workspace-artifact
           path: |
             ./
 
-  # This job retrieve workspace artifact from previous job and builds firmware
   build_firmware:
     name: Build firmware
     needs: workspace_setup
@@ -70,10 +60,10 @@ jobs:
     env:
       LIB_NAME: esp32-toolkit-lib
       PIO_ENV_CONF: esp32-latest
-      FIRMWARE_SRC: firmware-main.cpp # firmware source file to build
+      FIRMWARE_SRC: firmware-main.cpp
     steps:
       - name: Retrieve workspace artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: pio-workspace-artifact
       - name: Create symlinks
@@ -84,7 +74,6 @@ jobs:
           mkdir src && ln -s ../lib/esp32-toolkit-lib/examples/firmware-main.cpp src/main.cpp
       - name: Show final workspace structure
         run: |
-          # cat platformio.ini
           ls -laR
       - name: Install PlatformIO
         run: |
@@ -92,11 +81,10 @@ jobs:
           pip install --upgrade platformio
       - name: Build project
         run: |
-          # link to selected firmware source file
           rm src/main.cpp && ln -s ../lib/$LIB_NAME/examples/$FIRMWARE_SRC src/main.cpp
           pio run -e $PIO_ENV_CONF
       - name: Firmware artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: firmware-release
           path: |
