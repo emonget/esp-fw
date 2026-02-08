@@ -13,6 +13,19 @@
 - send/receive lora messages from web interface 
 - direct control of local device
 
+## Detailed usecases
+**Logs**
+- internal log call -> log console print
+- logs monitoring: internal log call -> log event dispatched -> log event handled ->  emit paquet over `WS` to connected client
+
+**GPIO**
+- pin control: client send request over WS to control pin -> paquet received on WS interface -> route to corresponding remote control module -> GPIO interface
+
+**Lora**
+- remote device ping: client -> emit paquet over ws to gateway -> paquet reception parsing and dispatching to module API -> module API request handling -> send paquet over `LORA` to remote device
+- `remote device` monitoring over `LORA` through `gateway device`: 
+
+
 ## Applications
 *** Alarm system ***
 - remote alarm system to be notified of any intrusions
